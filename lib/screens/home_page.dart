@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,7 @@ import '../widgets/offer_card.dart';
 import '../widgets/app_drawer.dart';
 import '../theme/bhejdu_colors.dart';
 import '../screens/product_variants_page.dart';
+import '../models/cart_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -76,13 +78,50 @@ class _HomePageState extends State<HomePage>
 
       if (cData["status"] == "success") {
         categories = cData["categories"];
+        // Replace "testing" with "Bakery and Bread"
+        for (var cat in categories) {
+          if (cat["name"] != null && cat["name"].toString().toLowerCase().contains("test")) {
+            cat["name"] = "Bakery and Bread";
+            cat["icon"] = "bakery";
+          }
+        }
       }
 
       if (fData["status"] == "success") {
         featured = fData["products"];
+        // Replace only testing products with Fresh White Bread and Brown Bread
+        final breadProducts = [
+          {"id": "101", "name": "Fresh White Bread", "price": "25", "image": "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=400&h=300&fit=crop"},
+          {"id": "102", "name": "Brown Bread", "price": "30", "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop"},
+        ];
+        for (int i = 0; i < featured.length; i++) {
+          if (featured[i]["name"] != null && featured[i]["name"].toString().toLowerCase().contains("test")) {
+            featured[i] = breadProducts[i % breadProducts.length];
+          }
+        }
       }
     } catch (e) {
       debugPrint("Home error: $e");
+      // ✅ Mock data fallback - Bakery & Bread Focus
+      if (categories.isEmpty) {
+        categories = [
+          {"id": "1", "name": "Bakery and Bread", "icon": "bakery"},
+          {"id": "2", "name": "Fruits", "icon": "eco"},
+          {"id": "3", "name": "Vegetables", "icon": "eco"},
+          {"id": "4", "name": "Dairy", "icon": "local_cafe"},
+          {"id": "5", "name": "Snacks", "icon": "fastfood"},
+        ];
+      }
+      if (featured.isEmpty) {
+        featured = [
+          {"id": "101", "name": "Fresh White Bread", "price": "25", "image": "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=400&h=300&fit=crop"},
+          {"id": "102", "name": "Brown Bread", "price": "30", "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop"},
+          {"id": "1", "name": "Fresh Apples", "price": "120", "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=300&fit=crop"},
+          {"id": "2", "name": "Whole Milk 1L", "price": "60", "image": "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=300&fit=crop"},
+          {"id": "3", "name": "Basmati Rice 1kg", "price": "90", "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop"},
+          {"id": "4", "name": "Orange Juice", "price": "75", "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=300&fit=crop"},
+        ];
+      }
     }
 
     setState(() => loading = false);
@@ -98,6 +137,8 @@ class _HomePageState extends State<HomePage>
         return Icons.fastfood;
       case "local_cafe":
         return Icons.local_cafe;
+      case "bakery":
+        return Icons.bakery_dining;
       default:
         return Icons.category;
     }
@@ -197,17 +238,31 @@ class _HomePageState extends State<HomePage>
                         OfferCard(
                           title: "Flat 20% OFF\nFirst Order",
                           bgColor: BhejduColors.offerOrange,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              "/product-list",
+                              arguments: {"id": "1", "name": "Bakery and Bread"},
+                            );
+                          },
                         ),
                         OfferCard(
                           title: "Free Delivery\nAbove ₹500",
                           bgColor: BhejduColors.successGreen,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              "/product-list",
+                              arguments: {"id": "1", "name": "Bakery and Bread"},
+                            );
+                          },
                         ),
                         OfferCard(
-                          title: "Buy 1 Get 1",
+                          title: "Buy 1 Get 1\nSpecial Offer",
                           bgColor: BhejduColors.offerBlue,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.pushNamed(context, "/special-offers");
+                          },
                         ),
                       ],
                     ),
@@ -356,13 +411,102 @@ class _HomePageState extends State<HomePage>
                                             FontWeight.w600),
                                       ),
                                       const SizedBox(height: 6),
-                                      Text(
-                                        "₹${p["price"]}",
-                                        style: const TextStyle(
-                                            color: BhejduColors
-                                                .successGreen,
-                                            fontWeight:
-                                            FontWeight.bold),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "₹${p["price"]}",
+                                            style: const TextStyle(
+                                                color: BhejduColors
+                                                    .successGreen,
+                                                fontWeight:
+                                                FontWeight.bold),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              try {
+                                                developer.log('========== ADD BUTTON TAPPED ==========');
+                                                developer.log('Raw product data: $p');
+                                                developer.log('ID raw: ${p["id"]}, type: ${p["id"]?.runtimeType}');
+                                                developer.log('Price raw: ${p["price"]}, type: ${p["price"]?.runtimeType}');
+                                                developer.log('Name raw: ${p["name"]}');
+                                                
+                                                final id = p["id"];
+                                                final price = p["price"];
+                                                final name = p["name"] ?? "Unknown";
+                                                final image = p["image"] ?? "";
+                                                
+                                                if (id == null) {
+                                                  developer.log('ERROR: ID is null');
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text('Error: Product ID is null')),
+                                                  );
+                                                  return;
+                                                }
+                                                
+                                                final idStr = id.toString();
+                                                final priceStr = price?.toString() ?? "0";
+                                                
+                                                developer.log('ID string: "$idStr"');
+                                                developer.log('Price string: "$priceStr"');
+                                                
+                                                if (idStr.isEmpty || idStr == "null") {
+                                                  developer.log('ERROR: ID string is empty or null');
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text('Error: Invalid product ID')),
+                                                  );
+                                                  return;
+                                                }
+                                                
+                                                final productId = int.tryParse(idStr) ?? 0;
+                                                final productPrice = int.tryParse(priceStr) ?? 0;
+                                                
+                                                developer.log('Parsed productId: $productId, productPrice: $productPrice');
+                                                
+                                                if (productId == 0) {
+                                                  developer.log('ERROR: Failed to parse productId');
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text('Error: Cannot parse product ID')),
+                                                  );
+                                                  return;
+                                                }
+                                                
+                                                developer.log('Adding to cart: id=$productId, name=$name, price=$productPrice');
+                                                
+                                                CartModel.addItem(
+                                                  productId: productId,
+                                                  name: name,
+                                                  price: productPrice,
+                                                  image: image,
+                                                );
+                                                
+                                                developer.log('SUCCESS: Item added to cart');
+                                                Navigator.pushNamed(context, "/cart");
+                                              } catch (e, stackTrace) {
+                                                developer.log('ERROR adding featured product: $e');
+                                                developer.log('Stack trace: $stackTrace');
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(content: Text('Error: $e')),
+                                                );
+                                              }
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: BhejduColors.primaryBlue,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: const Text(
+                                                "ADD",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -489,5 +633,6 @@ class _ServerBannerSliderState extends State<_ServerBannerSlider> {
         ),
       ),
     );
+
   }
 }

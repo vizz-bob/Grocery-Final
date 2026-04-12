@@ -199,6 +199,11 @@ class _LoginPageState extends State<LoginPage> {
       child: TextField(
         controller: controller,
         obscureText: obscure,
+        autocorrect: false,
+        enableSuggestions: false,
+        keyboardType: obscure
+            ? TextInputType.visiblePassword
+            : TextInputType.emailAddress,
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: hint,
@@ -221,6 +226,20 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     setState(() => isLoading = true);
+
+    // ✅ TEST USER BYPASS — remove this block before going live
+    if (email == "test@bhejdu.com" &&
+        (password == "test@1234" || password == "test1234")) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt("user_id", 9999);
+      await prefs.setString("user_name", "Test User");
+      await prefs.setString("user_email", "test@bhejdu.com");
+      await prefs.setString("user_mobile", "9000000000");
+      await prefs.setBool("is_logged_in", true);
+      setState(() => isLoading = false);
+      Navigator.pushNamed(context, "/home");
+      return;
+    }
 
     final url = Uri.parse(
       "https://darkslategrey-chicken-274271.hostingersite.com/api/login.php",

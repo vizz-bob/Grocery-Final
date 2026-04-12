@@ -20,6 +20,7 @@ class OfferCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       child: Container(
         width: 110,
+        height: 80, // ✅ FIXED HEIGHT - increased to prevent text cropping
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
           color: bgColor,
