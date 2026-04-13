@@ -18,16 +18,15 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VSCode
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins-dependencies
+.flutter-plugins
 .pub-cache/
 .pub/
 /build/
@@ -43,3 +42,55 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ─── SENSITIVE / SECRET FILES ────────────────────────────────────────────────
+
+# Environment & config files with secrets
+.env
+.env.*
+*.env
+env.dart
+lib/config/app_config.dart
+
+# Firebase / Google Services
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+
+# iOS signing & certificates
+*.p12
+*.cer
+*.mobileprovision
+ios/Runner/ExportOptions.plist
+
+# Android signing
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
+*.keystore
+*.jks
+
+# API keys / credentials files
+**/secrets.dart
+**/keys.dart
+**/credentials.dart
+secrets.json
+
+# CocoaPods (generated, not needed in git)
+ios/Pods/
+ios/.symlinks/
+ios/Podfile.lock
+
+# macOS
+**/.DS_Store
+*.xcuserstate
+ios/**/*.xcuserstate
+ios/Runner.xcworkspace/xcuserdata/
+
+# Xcode derived data & archives
+ios/DerivedData/
+*.xcarchive
+
+# Test user scripts (should never be in git)
+insert_test_user.php
+*test_user*.php
