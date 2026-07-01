@@ -17,6 +17,9 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController passCtrl = TextEditingController();
 
+  String _email = '';
+  String _password = '';
+
   bool isLoading = false;
 
   /// 👁 Password visibility
@@ -70,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                   _inputField(
                     controller: emailCtrl,
                     hint: "Email",
+                    onChanged: (val) => _email = val,
                   ),
 
                   const SizedBox(height: 20),
@@ -78,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                   _inputField(
                     controller: passCtrl,
                     hint: "Password",
+                    onChanged: (val) => _password = val,
                     obscure: !passwordVisible,
                     suffix: IconButton(
                       icon: Icon(
@@ -142,6 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
 
+
                   const SizedBox(height: 16),
 
                   /// SIGN UP LINK
@@ -167,6 +173,27 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
+
+                  /// BROWSE AS GUEST
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          "/home",
+                          (_) => false,
+                        );
+                      },
+                      child: const Text(
+                        "Browse as Guest",
+                        style: TextStyle(
+                          color: BhejduColors.textGrey,
+                          fontSize: 15,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -182,6 +209,7 @@ class _LoginPageState extends State<LoginPage> {
     required String hint,
     bool obscure = false,
     Widget? suffix,
+    ValueChanged<String>? onChanged,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -201,6 +229,7 @@ class _LoginPageState extends State<LoginPage> {
         obscureText: obscure,
         autocorrect: false,
         enableSuggestions: false,
+        onChanged: onChanged,
         keyboardType: obscure
             ? TextInputType.visiblePassword
             : TextInputType.emailAddress,
@@ -215,8 +244,8 @@ class _LoginPageState extends State<LoginPage> {
 
   /// ------------------ LOGIN LOGIC ------------------
   Future<void> loginUser() async {
-    final email = emailCtrl.text.trim();
-    final password = passCtrl.text.trim();
+    final email = _email.trim().isNotEmpty ? _email.trim() : emailCtrl.text.trim();
+    final password = _password.trim().isNotEmpty ? _password.trim() : passCtrl.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

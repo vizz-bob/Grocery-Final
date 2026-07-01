@@ -80,7 +80,7 @@ class _SignupPageState extends State<SignupPage> {
 
               _inputField(
                 controller: mobileCtrl,
-                label: "Mobile Number",
+                label: "Mobile Number (Optional)",
                 icon: Icons.phone,
                 keyboard: TextInputType.phone,
               ),

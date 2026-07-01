@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/bhejdu_colors.dart';
 import '../widgets/top_app_bar.dart';
@@ -128,6 +129,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               await prefs.clear();
                               Navigator.pushNamedAndRemoveUntil(context, "/login", (_) => false);
                             }, isLogout: true),
+                            _tile(Icons.delete_forever, "Delete Account", () => _confirmDeleteAccount(), isDelete: true),
                           ],
                         ),
                       ),
@@ -137,16 +139,60 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _tile(IconData icon, String title, VoidCallback onTap, {bool isLogout = false}) {
+  Widget _tile(IconData icon, String title, VoidCallback onTap,
+      {bool isLogout = false, bool isDelete = false}) {
+    final color = (isLogout || isDelete) ? Colors.red : BhejduColors.primaryBlue;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)]),
       child: ListTile(
-        leading: Icon(icon, color: isLogout ? Colors.red : BhejduColors.primaryBlue),
-        title: Text(title, style: TextStyle(color: isLogout ? Colors.red : BhejduColors.textDark, fontWeight: FontWeight.w600)),
+        leading: Icon(icon, color: color),
+        title: Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
         trailing: const Icon(Icons.arrow_forward_ios, size: 18),
         onTap: onTap,
       ),
     );
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Delete Account"),
+        content: const Text(
+          "You will be taken to our website to complete account deletion. "
+          "All your data, orders, and saved addresses will be permanently removed. "
+          "This action cannot be undone.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Continue",
+                style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final url = Uri.parse("https://bhejdu.in/acc_del");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please visit bhejdu.in/acc_del to delete your account.",
+          ),
+        ),
+      );
+    }
   }
 }
