@@ -47,13 +47,8 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
-    if (userId != null) {
-      // User already logged in
-      Navigator.of(context).pushReplacementNamed('/home');
-    } else {
-      // User not logged in
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
+    // Always go to home — guests can browse without login
+    Navigator.of(context).pushReplacementNamed('/home');
   }
 
   @override
